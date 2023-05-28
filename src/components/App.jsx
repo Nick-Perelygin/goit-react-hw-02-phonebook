@@ -20,32 +20,38 @@ export class App extends React.Component {
   };
 
   addContact = (data) => {
+    const {contacts} = this.state
+
     const contact = {
       id: nanoid(),
       name: data.name,
       number: data.number,
     };
 
-    this.state.contacts.filter(cont =>
-        cont.name.toLowerCase().trim() ===
-        contact.name.toLowerCase().trim() ||
-        cont.number.trim() === contact.number.trim()
-    ).length 
+    const filterResult = contacts.filter(prevContact =>
+      prevContact.name.toLowerCase().trim() ===
+      contact.name.toLowerCase().trim() ||
+      prevContact.number.trim() === contact.number.trim()
+    )
+
+    filterResult.length 
     ? alert(`${contact.name}: is already in contacts`)
     : this.setState(prevState => {
-      return {
-        contacts: [contact, ...prevState.contacts],
-      };
+      return {contacts: [contact, ...prevState.contacts],};
     });
   }
 
   onFilter = e => {
     this.setState({filter: e.currentTarget.value})
   }
+
+  visibleContacts() {
+    const {contacts, filter} = this.state
+    return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
+  }
   
   render() {
-    const{ contacts, filter } = this.state;
-    const visibleContacts = contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
+    const{ filter } = this.state;
   return (
     <div
       style={{
@@ -59,8 +65,8 @@ export class App extends React.Component {
       <h1>Phonebook</h1>
       <ContactForm onSubmitForm={this.addContact}/>
       <h2>Contacts</h2>
-      <Filter value={filter} onChange={this.onFilter} onReset={this.reset}/>
-      <ContactList contacts={visibleContacts} onDeleteContact={this.deleteContact}/>
+      <Filter value={filter} onChange={this.onFilter}/>
+      <ContactList contacts={this.visibleContacts()} onDeleteContact={this.deleteContact}/>
     </div>
   )}
 };
